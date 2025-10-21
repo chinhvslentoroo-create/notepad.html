@@ -1,0 +1,62 @@
+<!doctype html>
+const isDark = root.getAttribute('data-theme')!=='dark';
+setTheme(isDark);
+});
+
+
+// Keyboard shortcuts
+window.addEventListener('keydown', (e)=>{
+const cmd = e.ctrlKey || e.metaKey;
+if(cmd && e.key.toLowerCase()==='s'){
+e.preventDefault(); downloadText('note.txt', editor.value);
+}
+if(cmd && e.key.toLowerCase()==='n'){
+e.preventDefault(); if(confirm('Шинээр үүсгэх үү?')) editor.value=''; updateStats();
+}
+if(cmd && e.key.toLowerCase()==='o'){
+e.preventDefault(); fileInput.click();
+}
+});
+
+
+// Autosave using localStorage
+let autosave = false;
+let autosaveTimer = null;
+function enableAutosave(on){
+autosave = on;
+autosaveStatus.textContent = on ? 'Ажиллаж байна' : 'Ажиллаагүй';
+if(on){
+autosaveTimer = setInterval(()=>{
+localStorage.setItem('notepad:content', editor.value);
+lastSaved.textContent = new Date().toLocaleString();
+}, 3000);
+} else { clearInterval(autosaveTimer); autosaveTimer=null; }
+}
+toggleAuto.addEventListener('click', ()=> enableAutosave(!autosave));
+
+
+// Load from localStorage on start
+window.addEventListener('load', ()=>{
+const saved = localStorage.getItem('notepad:content');
+if(saved){
+editor.value = saved;
+updateStats();
+lastSaved.textContent = 'Локалаас ачаалсан';
+}
+});
+
+
+// Update stats while typing (debounced)
+let typingTimer;
+editor.addEventListener('input', ()=>{
+clearTimeout(typingTimer);
+typingTimer = setTimeout(updateStats, 300);
+});
+
+
+// Initialize UI
+updateStats();
+setTheme(false);
+</script>
+</body>
+</html>
